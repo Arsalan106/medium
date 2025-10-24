@@ -91,20 +91,6 @@ blogRouter.get('/:id', async (c) => {
         return c.json({ error: e.message });
     }
 })
-blogRouter.get('/bulk', async (c) => {
-    const databaseUrl = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza183VTBCWEozcXJ6ZEpqQTNIVUMzMFQiLCJhcGlfa2V5IjoiMDFLODNTMEJYVlJLVEo0NjFYOEpBMTM3NloiLCJ0ZW5hbnRfaWQiOiIzZmEwZTRhN2E2YzE4YzBmZTA3MTJiODNiYTYwMzhhOGJkYmY2MWU4ODAwZDNkYjVhMDM3ZDhhYWNiZDRhZDllIiwiaW50ZXJuYWxfc2VjcmV0IjoiNDRlYzc4MjgtMGM4NC00YjgwLWI1OTktZmRjNjBlZmIzOTc2In0.BQoGuEvccbUPTajWuD7QpgrT7uwZYy0iOdmDwbKbves"
-    const prisma = new PrismaClient({
-        datasourceUrl: databaseUrl,
-    }).$extends(withAccelerate());
-    try {
-        const allBlog = await prisma.post.findMany();
-        c.status(200);
-        return c.json({ allBlog: allBlog })
-    } catch (e: any) {
-        c.status(403);
-        return c.json({ error: e.message });
-    }
-})
 
 
 
