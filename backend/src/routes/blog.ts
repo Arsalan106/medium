@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client/edge";
+import { Prisma, PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { verify } from "hono/jwt";
@@ -13,7 +13,7 @@ blogRouter.use('/*', async (c:any, next) => {
 	if (!jwt) {
 		c.status(401);
 		return c.json({ error: "unauthorized" });
-	}
+	}   
 	const token = jwt.split(' ')[1];
 	const payload = await verify(token, "Arsalan");
 	if (!payload) {
@@ -48,7 +48,7 @@ blogRouter.post('/', async (c:any) => {
 })
 
 
-blogRouter.put('/', async (c) => {
+blogRouter.put('/', async (c) => {  
     const databaseUrl = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza183VTBCWEozcXJ6ZEpqQTNIVUMzMFQiLCJhcGlfa2V5IjoiMDFLODNTMEJYVlJLVEo0NjFYOEpBMTM3NloiLCJ0ZW5hbnRfaWQiOiIzZmEwZTRhN2E2YzE4YzBmZTA3MTJiODNiYTYwMzhhOGJkYmY2MWU4ODAwZDNkYjVhMDM3ZDhhYWNiZDRhZDllIiwiaW50ZXJuYWxfc2VjcmV0IjoiNDRlYzc4MjgtMGM4NC00YjgwLWI1OTktZmRjNjBlZmIzOTc2In0.BQoGuEvccbUPTajWuD7QpgrT7uwZYy0iOdmDwbKbves"
     const prisma = new PrismaClient({
         datasourceUrl: databaseUrl,
@@ -65,32 +65,47 @@ blogRouter.put('/', async (c) => {
                 content: body.content,
             }
         })
-        return c.json({ id: response.id })
+        return c.json({ id: response.id,title:response.title })
     } catch (e: any) {
         c.status(403);
         return c.json({ e: e.message })
     }
 })
 
+blogRouter.get('/bulk',async (c)=>{
+    const databaseUrl="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza183VTBCWEozcXJ6ZEpqQTNIVUMzMFQiLCJhcGlfa2V5IjoiMDFLODNTMEJYVlJLVEo0NjFYOEpBMTM3NloiLCJ0ZW5hbnRfaWQiOiIzZmEwZTRhN2E2YzE4YzBmZTA3MTJiODNiYTYwMzhhOGJkYmY2MWU4ODAwZDNkYjVhMDM3ZDhhYWNiZDRhZDllIiwiaW50ZXJuYWxfc2VjcmV0IjoiNDRlYzc4MjgtMGM4NC00YjgwLWI1OTktZmRjNjBlZmIzOTc2In0.BQoGuEvccbUPTajWuD7QpgrT7uwZYy0iOdmDwbKbves"
+    const prisma=new PrismaClient({
+        datasourceUrl:databaseUrl,
+    }).$extends(withAccelerate());
+    try{
+        const allBlog=await prisma.post.findMany();
+        return c.json({allBlog})
+    }catch(e:any){
+        c.status(403);
+        return c.json({error:e.message});
+    }
+})
 
 blogRouter.get('/:id', async (c) => {
     const databaseUrl = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza183VTBCWEozcXJ6ZEpqQTNIVUMzMFQiLCJhcGlfa2V5IjoiMDFLODNTMEJYVlJLVEo0NjFYOEpBMTM3NloiLCJ0ZW5hbnRfaWQiOiIzZmEwZTRhN2E2YzE4YzBmZTA3MTJiODNiYTYwMzhhOGJkYmY2MWU4ODAwZDNkYjVhMDM3ZDhhYWNiZDRhZDllIiwiaW50ZXJuYWxfc2VjcmV0IjoiNDRlYzc4MjgtMGM4NC00YjgwLWI1OTktZmRjNjBlZmIzOTc2In0.BQoGuEvccbUPTajWuD7QpgrT7uwZYy0iOdmDwbKbves"
     const prisma = new PrismaClient({
         datasourceUrl: databaseUrl,
     }).$extends(withAccelerate());
-    const id = c.req.param('id');
+    const id=c.req.param("id");
     try {
-        const blog = await prisma.post.findUnique({
-            where: {
-                id: id
+        const blog = await prisma.post.findFirst({
+            where: {    
+                id:String(id)
             }
         })
+        //@ts-ignore
         return c.json({ blog });
     } catch (e: any) {
         c.status(403);
         return c.json({ error: e.message });
     }
 })
+
 
 
 
