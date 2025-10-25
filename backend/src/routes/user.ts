@@ -11,12 +11,6 @@ export const userRouter=new Hono<{
 }>();
 
 
-userRouter.get("/check", (c) => {
-  return c.json({
-    jwt_secret: c.env.JWT_SECRET || "❌ undefined",
-    db_url: c.env.DATABASE_URL ? "✅ Loaded" : "❌ Missing",
-  });
-});
 
 userRouter.post('/signup', async (c) => {
   const databaseUrl ="prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza183VTBCWEozcXJ6ZEpqQTNIVUMzMFQiLCJhcGlfa2V5IjoiMDFLODNTMEJYVlJLVEo0NjFYOEpBMTM3NloiLCJ0ZW5hbnRfaWQiOiIzZmEwZTRhN2E2YzE4YzBmZTA3MTJiODNiYTYwMzhhOGJkYmY2MWU4ODAwZDNkYjVhMDM3ZDhhYWNiZDRhZDllIiwiaW50ZXJuYWxfc2VjcmV0IjoiNDRlYzc4MjgtMGM4NC00YjgwLWI1OTktZmRjNjBlZmIzOTc2In0.BQoGuEvccbUPTajWuD7QpgrT7uwZYy0iOdmDwbKbves"
@@ -24,8 +18,6 @@ userRouter.post('/signup', async (c) => {
 		datasourceUrl: databaseUrl	,
 	}).$extends(withAccelerate());
   const body = await c.req.json();
-  //@ts-ignore
-  console.log(c.env.JWT_SECRET);
   	try {
 		const user = await prisma.user.create({
 			data: {
@@ -33,6 +25,7 @@ userRouter.post('/signup', async (c) => {
 				password: body.password
 			}
 		});
+
 
         //@ts-ignore
 		const jwt = await sign({ id: user.id },"Arsalan");
